@@ -29,6 +29,9 @@ public class Application
 	public static void main(String[] args) 
 	{
 		Application app = new Application();
+		mSelfNodeID = Integer.parseInt(args[0]);
+		mConfigFile = args[1];
+		mConfigReader = new ConfigReader(mConfigFile);
 		
 		/* create server */
 		mServer = new SctpServer(mConfigReader.getNodeConfig(mSelfNodeID)[0], mConfigReader.getNodeConfig(mSelfNodeID)[1], mConfigReader.getNodeConfig(mSelfNodeID)[2],mConfigReader.getNodeCount() - 1);
