@@ -1,5 +1,12 @@
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import com.sun.nio.sctp.MessageInfo;
+import com.sun.nio.sctp.SctpChannel;
 
 public class Application 
 {
@@ -25,6 +32,54 @@ public class Application
 		isRequesting = false;
 	}
 	
+	public void applicationModule()
+	{
+		
+		Random random_delay = new Random();
+		while(true)
+		{
+			try 
+			{
+				Thread.sleep(random_delay.nextInt(3000));
+				csEnter();
+				
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	private void csEnter() 
+	{
+		for(int i=0; i< mConfigReader.getNodeCount();i++)
+		{
+			if(i!= mSelfNodeID)
+			{
+				SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(i)[1],Integer.parseInt(mConfigReader.getNodeConfig(i)[2]));
+				MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
+				
+				try {
+
+					SctpChannel mSctpChannel = SctpChannel.open();
+					mSctpChannel.connect(mSocketAddress);
+					ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+					mByteBuffer.put("test".getBytes());
+					mByteBuffer.flip();
+					mSctpChannel.send(mByteBuffer,mMessageInfo);
+					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
+					break;
+				} catch (Exception e) {
+						
+				}
+			}
+			
+			
+		}
+		
+	}
 	
 	public static void main(String[] args) 
 	{
@@ -39,21 +94,26 @@ public class Application
 		System.out.println("SctpVectorClock : Starting Server : "+args[0]+" at "+mConfigReader.getNodeConfig(mSelfNodeID)[1]+":"+mConfigReader.getNodeConfig(mSelfNodeID)[2]);
 		mServerThread.start();
 
+		app.applicationModule();
+		
 		/* create clients */
-		int skipped = 0;
-		for (int i = 0; i < mConfigReader.getNodeCount(); i++) {
-			if (i == mSelfNodeID) {
-				skipped = 1;
-				continue;
-			} else {
-				System.out.println("SctpVectorClock : Starting Client : "+mConfigReader.getNodeConfig(i)[0]+" at "+mConfigReader.getNodeConfig(i)[1]+":"+mConfigReader.getNodeConfig(i)[2]);
-				mClients.add(new SctpClient(args[0], mConfigReader.getNodeConfig(i)[0], mConfigReader.getNodeConfig(i)[1], mConfigReader.getNodeConfig(i)[2]));
-				mClientThreads.add(new Thread(mClients.get(i - skipped)));
-				mClientThreads.get(i - skipped).start();
-			}
-		}
+//		int skipped = 0;
+//		for (int i = 0; i < mConfigReader.getNodeCount(); i++) {
+//			if (i == mSelfNodeID) {
+//				skipped = 1;
+//				continue;
+//			} else {
+//				System.out.println("SctpVectorClock : Starting Client : "+mConfigReader.getNodeConfig(i)[0]+" at "+mConfigReader.getNodeConfig(i)[1]+":"+mConfigReader.getNodeConfig(i)[2]);
+//				mClients.add(new SctpClient(args[0], mConfigReader.getNodeConfig(i)[0], mConfigReader.getNodeConfig(i)[1], mConfigReader.getNodeConfig(i)[2]));
+//				mClientThreads.add(new Thread(mClients.get(i - skipped)));
+//				mClientThreads.get(i - skipped).start();
+//			}
+//		}
 
 	}
+
+
+	
 
 
 

@@ -1,5 +1,7 @@
 import java.net.*;
 import java.nio.*;
+import java.util.Random;
+
 import com.sun.nio.sctp.*;
 
 public class SctpClient implements Runnable {
@@ -10,6 +12,8 @@ public class SctpClient implements Runnable {
 	private String mServerNodeID;
 	StringBuffer mMessage = new StringBuffer("Hi"); /* change the message to be sent here */
 	ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+	int sequenceNumber = 1;
+	
 	//private VectorClock mSelfClock;
 
 	public SctpClient(String mSelfNodeID, String mServerNodeID, String mServerAddress, String mServerPort) {
@@ -62,6 +66,33 @@ public class SctpClient implements Runnable {
 						System.out.println("SctpClient "+mServerNodeID+" : Couldn't Sleep...");
 					}
 			}
+			
+			applicationModule();
 		}
+	}
+
+	private void applicationModule() 
+	{
+		Random random_delay = new Random();
+		while(true)
+		{
+			try 
+			{
+				Thread.sleep(random_delay.nextInt(3000));
+				csEnter();
+				
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	private void csEnter() 
+	{
+		
+		
 	}
 }
