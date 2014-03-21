@@ -70,8 +70,10 @@ public class Application
 					mByteBuffer.flip();
 					mSctpChannel.send(mByteBuffer,mMessageInfo);
 					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
-					break;
+					System.out.println("SctpClient sending to "+ i);
+					//break;
 				} catch (Exception e) {
+					System.out.println("Exception: " +  e);
 						
 				}
 			}

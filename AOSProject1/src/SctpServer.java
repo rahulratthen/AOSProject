@@ -52,9 +52,10 @@ public class SctpServer implements Runnable {
 
 				mMessage = bufferToString(mBuffer);
 
-//				mMessageParts = mMessage.split("/");
+				//mMessageParts = mMessage.split("/");
 //				mClockInMessage = mMessageParts[2].trim().split(" ");
-//				System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
+				//System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
+				System.out.println("Sctp Server: " + mMessage);
 				mBuffer.flip();
 
 //				/* update self clock from received clock */
@@ -72,12 +73,34 @@ public class SctpServer implements Runnable {
 //				System.out.print("\n");
 
 				mMessageCount++;
+				
+			}
+			while(true){
+				String mMessage;
+				String mMessageParts[];
+				//String mClockInMessage[];
+				//int mReceivedClock[];
+				//int mUpdatedClock[];
+
+				SctpChannel mClientChannel = mServerChannel.accept();
+
+				mClientChannel.receive(mBuffer,null,null);
+
+				mMessage = bufferToString(mBuffer);
+
+				//mMessageParts = mMessage.split("/");
+//				mClockInMessage = mMessageParts[2].trim().split(" ");
+				//System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
+				System.out.println("Sctp Server: " + mMessage);
+				mBuffer.flip();
+				
 			}
 			// System.out.println("SctpServer "+mSelfNodeID+" : Messages Received from All Neighbours");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	private String bufferToString(ByteBuffer mBuffer) {
