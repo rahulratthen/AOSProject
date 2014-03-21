@@ -1,0 +1,50 @@
+Two types of messages:
+
+Request(j,n)
+	- j is node identifier
+	- n is sequence number indicating that this is the (n+1)th request
+
+Privelege(Q,LN)
+	- Q is a queue of requesting nodes
+ 	- LN is an array of size N such that LN[j] is the sequence number of node j granted most recently
+
+Node
+	- Each node has a node identifier I
+	- Each node has an array RN of size N which records the largest sequence number received from each of the other nodes
+	- Each node has an array LN  of size N such that LN[j] is the sequence number of node j granted most recently
+	- Each node has the queue Q of requesting nodes
+	- Boolean to say whether or not you have token: HaveToken
+	- Boolean to say whether or not you are requesting token: IsRequesting
+	- Sequence number n (number of requests so far)
+
+Algorithm
+	a) When Request(j,n) message is received:
+		- Update RN[j] = max(RN[j],n);
+		- if(HaveToken)&&(!IsRequesting)&&(RN[j] = LN[j] + 1) then {HaveToken = FALSE; send Privelege(Q,LN) to node j;}
+	b) When making a Request:
+		- Set IsRequesting = TRUE;
+		- if(!HaveToken)
+			- RN[I] = RN[I] + 1;
+			- Send Request(I,RN[I]) to all other nodes
+			- Wait until Privelege(Q,LN) is received
+			- Set HaveToken = TRUE
+		- Enter Critical Section
+	c) When leaving critical section:
+		- LN[I] = RN[I];
+		- For all other nodes j, if j is not already in Q and RN[j] = LN[j] + 1 then add j to the end of the Q
+		- If the Q is not empty
+			- Set HaveToken = FALSE;
+			- Send Privelege(tail(Q),LN) to node that is in head(Q)
+			
+		- Set IsRequesting = FALSE;
+ 
+ Tasks:
+ 2) Sharing variables with Server thread. - Rahul
+ 3) Add all the arrays and other variables required for algorithm - Shanti
+ 4) Implement way to encode and decode request message as string - Shanti
+ 5) Implement way to encode and decode privelege message as string - Viswam
+ 6) Implement algorithm module for what to do when sending a request - Viswam
+ 7) Implement algorithm module for what to do when receiving a request on server - Rahul
+ 8) Implement algorithm module for what to do when leaving critical section - Shanti
+ 9) Testing module
+ 
