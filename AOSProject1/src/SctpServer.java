@@ -11,11 +11,13 @@ public class SctpServer implements Runnable {
 	private String mPort;
 	private String mSelfNodeID;
 	private int mNeighbourCount;
+	Application parentThread;
 	private ByteBuffer mBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
 	//private VectorClock mSelfClock;
 
-	public SctpServer(String mSelfNodeID, String mAddress, String mPort, int mNeighbourCount) {
+	public SctpServer(Application p, String mSelfNodeID, String mAddress, String mPort, int mNeighbourCount) {
 		super();
+		parentThread = p;
 		this.mAddress = mAddress;
 		this.mPort = mPort;
 		this.mNeighbourCount = mNeighbourCount;
@@ -92,6 +94,20 @@ public class SctpServer implements Runnable {
 //				mClockInMessage = mMessageParts[2].trim().split(" ");
 				//System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
 				System.out.println("Sctp Server: " + mMessage);
+				
+
+				//Adding the mutex part - Rahul
+				if(mMessage.startsWith("p"))
+				{
+					parentThread.updateLocal(mMessage);
+					
+				}
+				else if(mMessage.startsWith("r"))
+				{
+					System.out.println("Starts with r");
+					parentThread.processRequestMessage(mMessage);
+				}
+				
 				mBuffer.flip();
 				
 			}
