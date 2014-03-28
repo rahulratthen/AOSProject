@@ -12,7 +12,7 @@ public class SctpServer implements Runnable {
 	private String mSelfNodeID;
 	private int mNeighbourCount;
 	Application parentThread;
-	private ByteBuffer mBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+	//private 
 	//private VectorClock mSelfClock;
 
 	public SctpServer(Application p, String mSelfNodeID, String mAddress, String mPort, int mNeighbourCount) {
@@ -40,7 +40,7 @@ public class SctpServer implements Runnable {
 
 			// System.out.println("SctpServer "+mSelfNodeID+" : Bind Server to Port : "+Integer.parseInt(mPort));
 			mServerChannel.bind(mServerAddress);
-
+/*
 			while (mMessageCount < mNeighbourCount) {
 				String mMessage;
 				String mMessageParts[];
@@ -74,10 +74,13 @@ public class SctpServer implements Runnable {
 //				}
 //				System.out.print("\n");
 
-				mMessageCount++;
+//				mMessageCount++;
 				
-			}
+//			}
+			
+			
 			while(true){
+				ByteBuffer mBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
 				String mMessage;
 				String mMessageParts[];
 				//String mClockInMessage[];
@@ -95,6 +98,10 @@ public class SctpServer implements Runnable {
 				//System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
 				System.out.println("Sctp Server: " + mMessage);
 				
+				while(!parentThread.finishedCS)
+				{
+					System.out.print("a");
+				}
 
 				//Adding the mutex part - Rahul
 				if(mMessage.startsWith("p"))

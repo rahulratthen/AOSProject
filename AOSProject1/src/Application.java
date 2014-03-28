@@ -15,9 +15,9 @@ import com.sun.nio.sctp.SctpChannel;
 public class Application 
 {
 	//int nodeID;
-	boolean haveToken;
-	boolean isRequesting;
 	boolean havePrivilege;
+	boolean isRequesting;
+	boolean finishedCS;
 	
 	public static int MESSAGE_SIZE = 128;
 
@@ -39,7 +39,7 @@ public class Application
 	
 	public Application()
 	{
-		haveToken = false;
+		havePrivilege = false;
 		isRequesting = false;
 		
 		
@@ -54,7 +54,7 @@ public class Application
 		}
 		if(mSelfNodeID == 0)
 			{
-				haveToken = true;
+				havePrivilege = true;
 				havePrivilege = true;
 			}
 		
@@ -68,7 +68,7 @@ public class Application
 		{
 			try 
 			{
-				Thread.sleep(random_delay.nextInt(3000));
+				Thread.sleep(2000);
 				csEnter();
 				csLeave();
 				
@@ -96,30 +96,31 @@ public class Application
 
 			RN.set(j,new Integer(Math.max(RN.get(j), n)));
 			//RN[j] = Math.max(RN[j], n);
-			System.out.println("RN element " + j + " is "+RN.get(j));
-			if((haveToken)&&(!isRequesting)&&(RN.get(j)== LN.get(j) + 1))
+			System.out.println("Privilege : "+havePrivilege+ " Requesting: "+isRequesting + "Rn[j] : "+RN.get(j)+ "Ln[j]: "+LN.get(j));
+			if((havePrivilege)&&(!isRequesting)&&(RN.get(j)== LN.get(j) + 1))
 			{
-				haveToken = false;
+				havePrivilege = false;
 				
 				String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
-				SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(j)[1],Integer.parseInt(mConfigReader.getNodeConfig(j)[2]));
-				MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
-				
-				try {
-
-					SctpChannel mSctpChannel = SctpChannel.open();
-					mSctpChannel.connect(mSocketAddress);
-					ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
-					mByteBuffer.put(encodedPrivilegeMsg.getBytes());
-					mByteBuffer.flip();
-					mSctpChannel.send(mByteBuffer,mMessageInfo);
-					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
-					System.out.println("Privilege Message sending to "+ j);
-					//break;
-				} catch (Exception e) {
-					System.out.println("Exception: " +  e);
-						
-				}
+				sendPrivelege(encodedPrivilegeMsg, j);
+//				SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(j)[1],Integer.parseInt(mConfigReader.getNodeConfig(j)[2]));
+//				MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
+//				
+//				try {
+//
+//					SctpChannel mSctpChannel = SctpChannel.open();
+//					mSctpChannel.connect(mSocketAddress);
+//					ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+//					mByteBuffer.put(encodedPrivilegeMsg.getBytes());
+//					mByteBuffer.flip();
+//					mSctpChannel.send(mByteBuffer,mMessageInfo);
+//					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
+//					System.out.println("Privilege Message sending to "+ j);
+//					//break;
+//				} catch (Exception e) {
+//					System.out.println("Exception: " +  e);
+//						
+//				}
 			}
 			
 		}
@@ -137,7 +138,7 @@ public class Application
 				e.printStackTrace();
 			}
 			
-			
+			finishedCS = true;
 		}
 		
 		private boolean elementInQueue(Queue que , int element)
@@ -170,6 +171,7 @@ public class Application
 	
 	private void ExitCS()
 	{
+		finishedCS = true;
 		System.out.println("Node "+mSelfNodeID+" exiting CS");
 		LN.set(mSelfNodeID, RN.get(mSelfNodeID));
 		for(int i=0; i< mConfigReader.getNodeCount();i++)
@@ -188,27 +190,29 @@ public class Application
 		{
 			System.out.println("asd");
 			havePrivilege = false;
+			havePrivilege = false;
 			int headElement = (Integer)requestQueue.remove();
+			
 			String msg = encodePrivelege(requestQueue,LN);
-			
-			SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(headElement)[1],Integer.parseInt(mConfigReader.getNodeConfig(headElement)[2]));
-			MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
-			
-			try {
-
-				SctpChannel mSctpChannel = SctpChannel.open();
-				mSctpChannel.connect(mSocketAddress);
-				ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
-				mByteBuffer.put(msg.getBytes());
-				mByteBuffer.flip();
-				mSctpChannel.send(mByteBuffer,mMessageInfo);
-				//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
-				System.out.println("SctpClient sending Privilege msg to "+ headElement);
-				
-			} catch (Exception e) {
-				System.out.println("Exception: " +  e);
-					
-			}
+			sendPrivelege(msg, headElement);
+//			SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(headElement)[1],Integer.parseInt(mConfigReader.getNodeConfig(headElement)[2]));
+//			MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
+//			
+//			try {
+//
+//				SctpChannel mSctpChannel = SctpChannel.open();
+//				mSctpChannel.connect(mSocketAddress);
+//				ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+//				mByteBuffer.put(msg.getBytes());
+//				mByteBuffer.flip();
+//				mSctpChannel.send(mByteBuffer,mMessageInfo);
+//				//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
+//				System.out.println("SctpClient sending Privilege msg to "+ headElement);
+//				
+//			} catch (Exception e) {
+//				System.out.println("Exception: " +  e);
+//					
+//			}
 		}
 		
 		isRequesting = false;
@@ -299,13 +303,18 @@ public class Application
 		message = message.substring(1); //Remove the first letter 'p'
 		
 		String temp1[] = message.split("!"); //Queue and array separated by ! mark
-		System.out.println(temp1[0].length());
-		String temp2[] = temp1[0].split(",");//Take the queue alone
+		//System.out.println(temp1[0].length());
 		
-		for(int i=0; i<temp2.length; i++)
+		if(temp1[0].length() > 0)
 		{
-			q.add(Integer.parseInt(temp2[i]));
+			String temp2[] = temp1[0].split(",");//Take the queue alone
+			
+			for(int i=0; i<temp2.length; i++)
+			{
+				q.add(Integer.parseInt(temp2[i].trim()));
+			}
 		}
+		
 		
 		return q;
 	}
@@ -318,11 +327,12 @@ public class Application
 		String temp2[] = temp1[1].split(","); //Take the array alone
 		
 		int arrLength = temp2.length;
+		//System.out.println(arrLength);
 		ArrayList<Integer> arr = new ArrayList<Integer>();
 		
-		for(int i=0; i<temp2.length; i++)
+		for(int i=0; i<temp2.length-1; i++)
 		{
-			arr.add(Integer.parseInt(temp2[i]));
+			arr.add(Integer.parseInt(temp2[i].trim()));
 		}
 		
 		return arr;
@@ -330,6 +340,7 @@ public class Application
 	
 	public void sendPrivelege(String message, int destID)
 	{
+		isRequesting = false;
 		SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(destID)[1],Integer.parseInt(mConfigReader.getNodeConfig(destID)[2]));
 		MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
 		
@@ -350,9 +361,10 @@ public class Application
 	
 	public void updateLocal(String prevMsg)
 	{
-		haveToken = true;
+		havePrivilege = true;
 		requestQueue = getPrivelegeQueue(prevMsg);
 		LN = getPrivelegeArray(prevMsg);
+		System.out.println("Updated local");
 	}
 	
 	public void broadcastRequest(String message)
@@ -372,7 +384,7 @@ public class Application
 					mByteBuffer.put(message.getBytes());
 					mByteBuffer.flip();
 					mSctpChannel.send(mByteBuffer,mMessageInfo);
-					System.out.println("Sending request to "+ i);
+					System.out.println("Sending request "+ message + "to " + i);
 				} catch (Exception e) {
 					System.out.println("Exception: " +  e);
 						
@@ -386,15 +398,15 @@ public class Application
 	public void algorithmSendRequest()
 	{
 		isRequesting = true;
-		
-		if(!haveToken)
+		finishedCS = false;
+		if(!havePrivilege)
 		{
 			//System.out.println(RN.size()+ LN.size());
 			int temp = RN.get(mSelfNodeID);
 			temp+= 1;
 			RN.set(mSelfNodeID, temp);
 			broadcastRequest(encodeRequest(mSelfNodeID,++seqNum));
-			while(!haveToken){};
+			while(!havePrivilege){};
 		}
 		CriticalSection();
 	}
