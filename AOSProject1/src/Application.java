@@ -96,32 +96,32 @@ public class Application
 
 			RN.set(j,new Integer(Math.max(RN.get(j), n)));
 			//RN[j] = Math.max(RN[j], n);
-			System.out.println("Privilege : "+havePrivilege+ " Requesting: "+isRequesting + "Rn[j] : "+RN.get(j)+ "Ln[j]: "+LN.get(j));
-			if((havePrivilege)&&(!isRequesting)&&(RN.get(j)== LN.get(j) + 1))
-			{
-				havePrivilege = false;
+			// System.out.println("Privilege : "+havePrivilege+ " Requesting: "+isRequesting + "Rn[j] : "+RN.get(j)+ "Ln[j]: "+LN.get(j));
+			// if((havePrivilege)&&(!isRequesting)&&(RN.get(j)== LN.get(j) + 1))
+			// {
+				// havePrivilege = false;
 				
-				String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
-				sendPrivelege(encodedPrivilegeMsg, j);
-//				SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(j)[1],Integer.parseInt(mConfigReader.getNodeConfig(j)[2]));
-//				MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
-//				
-//				try {
-//
-//					SctpChannel mSctpChannel = SctpChannel.open();
-//					mSctpChannel.connect(mSocketAddress);
-//					ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
-//					mByteBuffer.put(encodedPrivilegeMsg.getBytes());
-//					mByteBuffer.flip();
-//					mSctpChannel.send(mByteBuffer,mMessageInfo);
-//					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
-//					System.out.println("Privilege Message sending to "+ j);
-//					//break;
-//				} catch (Exception e) {
-//					System.out.println("Exception: " +  e);
-//						
-//				}
-			}
+				// String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
+				// sendPrivelege(encodedPrivilegeMsg, j);
+// //				SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(j)[1],Integer.parseInt(mConfigReader.getNodeConfig(j)[2]));
+// //				MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
+// //				
+// //				try {
+// //
+// //					SctpChannel mSctpChannel = SctpChannel.open();
+// //					mSctpChannel.connect(mSocketAddress);
+// //					ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+// //					mByteBuffer.put(encodedPrivilegeMsg.getBytes());
+// //					mByteBuffer.flip();
+// //					mSctpChannel.send(mByteBuffer,mMessageInfo);
+// //					//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
+// //					System.out.println("Privilege Message sending to "+ j);
+// //					//break;
+// //				} catch (Exception e) {
+// //					System.out.println("Exception: " +  e);
+// //						
+// //				}
+			// }
 			
 		}
 		

@@ -98,10 +98,10 @@ public class SctpServer implements Runnable {
 				//System.out.println("SctpServer "+mSelfNodeID+" : Received from "+mMessageParts[1]+ " : "+mMessage);
 				System.out.println("Sctp Server: " + mMessage);
 				
-				while(!parentThread.finishedCS)
-				{
-					System.out.print("a");
-				}
+				// while(!parentThread.finishedCS)
+				// {
+					// System.out.print("a");
+				// }
 
 				//Adding the mutex part - Rahul
 				if(mMessage.startsWith("p"))
