@@ -1,3 +1,4 @@
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -71,12 +72,12 @@ public class Application
 	{
 		System.out.println("Entered app");
 		Random random_delay = new Random();
-		while(true)
+		while(seqNum<5)
 		{
 			if(timerExpired) System.out.println("Allowed to enter");
-			while(timerExpired)
+			while(timerExpired && seqNum<5)
 			{
-				System.out.println("Allowed to enter");
+				System.out.println("Allowed to enter "+seqNum);
 				try 
 				{
 					timerExpired = false;
@@ -145,8 +146,14 @@ public class Application
 		Date d = new Date();
 		System.out.println("Node "+ mSelfNodeID + "entering Cs at "+d.getTime());
 		try {
+			File file  = new File("cstest.txt");
+			FileWriter fw = new FileWriter(file,true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(mSelfNodeID + "e");
+			bw.close();
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+			
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -175,6 +182,35 @@ public class Application
 		ExitCS();
 	}
 
+	public int testCorrectness()
+	{
+		
+	    try {
+	    	BufferedReader br = new BufferedReader(new FileReader("cstest.txt"));
+	        String line1 = br.readLine();
+	        while(line1!=null)
+	        {
+	        	String line2 = br.readLine();
+	        	if(line2!=null)
+	        	{
+	        		if(!((line1.charAt(0) == line2.charAt(0)) && (line1.charAt(1) != line2.charAt(1)) ))
+	        		{
+	        			System.out.println("Oops!!");
+	        			return 0;
+	        		}
+	        	}
+	        	line1 = br.readLine();
+	        }
+	        
+	        System.out.println("Works!!");
+	        
+	    }
+	    catch(Exception e)
+	    {
+	    	System.out.println(e);
+	    }
+	    return 1;
+	}
 
 	private void csEnter() 
 	{
@@ -185,6 +221,17 @@ public class Application
 	private void ExitCS()
 	{
 		finishedCS = true;
+		try{
+		File file  = new File("cstest.txt");
+		FileWriter fw = new FileWriter(file,true);
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write("\n"+mSelfNodeID + "x\n");
+		bw.close();
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+		}
 		System.out.println("Node "+mSelfNodeID+" exiting CS");
 		LN.set(mSelfNodeID, RN.get(mSelfNodeID));
 		for(int i=0; i< mConfigReader.getNodeCount();i++)
@@ -277,6 +324,8 @@ public class Application
 		}
 
 		app.applicationModule();
+		
+		app.testCorrectness();
 
 		/* create clients */
 		//		int skipped = 0;
@@ -421,7 +470,7 @@ public class Application
 			temp+= 1;
 			RN.set(mSelfNodeID, temp);
 			broadcastRequest(encodeRequest(mSelfNodeID,++seqNum));
-			while(!havePrivilege){System.out.println("No privilege...");};
+			while(!havePrivilege){System.out.print(".");};
 		}
 		CriticalSection();
 	}

@@ -14,7 +14,7 @@ public class TimerThread implements Runnable {
 			try {
 				Thread.sleep(3000);
 				parentThread.updateTimer();
-				System.out.println("Thread executing");
+				//System.out.println("Thread executing");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
