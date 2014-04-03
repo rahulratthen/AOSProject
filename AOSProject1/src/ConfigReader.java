@@ -11,14 +11,12 @@ public class ConfigReader
 	ConfigReader (String mConfigFile) {
 		BufferedReader mFileReader;
 
-		// System.out.println("ConfigReader : "+mConfigFile);
 
 		try {
 			String mLine;
 			int index = 0;
 			mFileReader =  new BufferedReader(new FileReader(mConfigFile));
 			while((mLine = mFileReader.readLine()) != null) {
-				// System.out.println("ConfigReader : Line "+index+ " : "+mLine);
 				index++;
 
 				String[] mColomns = mLine.trim().split(" ");
