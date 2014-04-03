@@ -96,7 +96,7 @@ public class Application
 			
 			
 		}
-		while(havePrivilege && csCount < 10)
+		while(havePrivilege)
 		{
 			int asd = 0;
 			if(requestReceived)
@@ -104,6 +104,8 @@ public class Application
 				respondRequest();
 				requestReceived = false;
 			}
+			if(csCount<10)
+				break;
 		}
 	}
 	
