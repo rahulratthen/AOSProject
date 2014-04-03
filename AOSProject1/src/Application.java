@@ -38,6 +38,7 @@ public class Application
 	Queue<Integer> requestQueue = new LinkedList<Integer>();
 	int seqNum = -1;
 	int lastRequest = -1;
+	int csCount = 0;
 
 	public Application()
 	{
@@ -69,7 +70,7 @@ public class Application
 
 	public void applicationModule()
 	{
-		while(seqNum<5)
+		while(csCount<10)
 		{
 			int test = 0;
 			if(timerExpired)
@@ -149,6 +150,7 @@ public class Application
 
 	private void CriticalSection()
 	{
+		csCount++;
 		//do some activity in Cs. Write to Log file
 		Date d = new Date();
 		System.out.println("Node "+ mSelfNodeID + "entering Cs at "+d.getTime());
