@@ -96,7 +96,7 @@ public class Application
 			
 			
 		}
-		while(havePrivilege)
+		while(havePrivilege && csCount < 10)
 		{
 			int asd = 0;
 			if(requestReceived)
