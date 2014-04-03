@@ -20,7 +20,8 @@ public class Application
 	boolean isRequesting;
 	boolean finishedCS;
 	boolean timerExpired;
-
+	boolean requestReceived;
+	
 	public static int MESSAGE_SIZE = 128;
 
 	private static int mSelfNodeID = 0;
@@ -38,6 +39,7 @@ public class Application
 	ArrayList<Integer> LN = new ArrayList<Integer>();
 	Queue<Integer> requestQueue = new LinkedList<Integer>();
 	int seqNum = -1;
+	int lastRequest = -1;
 
 	public Application()
 	{
@@ -74,8 +76,9 @@ public class Application
 		Random random_delay = new Random();
 		while(seqNum<5)
 		{
-			if(timerExpired) System.out.println("Allowed to enter");
-			while(timerExpired && seqNum<5)
+			//if(timerExpired) System.out.println("Allowed to enter");
+			int test = 0;
+			if(timerExpired)
 			{
 				System.out.println("Allowed to enter "+seqNum);
 				try 
@@ -83,6 +86,7 @@ public class Application
 					timerExpired = false;
 					//Thread.sleep(2000);
 					csEnter();
+					CriticalSection();
 					csLeave();
 	
 				} 
@@ -91,8 +95,24 @@ public class Application
 					e.printStackTrace();
 				}
 			}
+			
+			else if(requestReceived)
+			{
+				respondRequest();
+				requestReceived = false;
+			}
+			
+			
 		}
-
+		while(havePrivilege)
+		{
+			int asd = 0;
+			if(requestReceived)
+			{
+				respondRequest();
+				requestReceived = false;
+			}
+		}
 	}
 
 
@@ -111,34 +131,39 @@ public class Application
 		RN.set(j,new Integer(Math.max(RN.get(j), n)));
 		//RN[j] = Math.max(RN[j], n);
 		// System.out.println("Privilege : "+havePrivilege+ " Requesting: "+isRequesting + "Rn[j] : "+RN.get(j)+ "Ln[j]: "+LN.get(j));
-//		if((havePrivilege)&&(!isRequesting)&&(RN.get(j)== LN.get(j) + 1))
-//		{
-//			havePrivilege = false;
-//
-//			String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
-//			sendPrivelege(encodedPrivilegeMsg, j);
-//			SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(j)[1],Integer.parseInt(mConfigReader.getNodeConfig(j)[2]));
-//			MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
-//
-//			try {
-//
-//				SctpChannel mSctpChannel = SctpChannel.open();
-//				mSctpChannel.connect(mSocketAddress);
-//				ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
-//				mByteBuffer.put(encodedPrivilegeMsg.getBytes());
-//				mByteBuffer.flip();
-//				mSctpChannel.send(mByteBuffer,mMessageInfo);
-//				//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
-//				System.out.println("Privilege Message sending to "+ j);
-//				//break;
-//			} catch (Exception e) {
-//				System.out.println("Exception: " +  e);
-//
-//			}
-//		}
 
 	}
+	
+	public void respondRequest()
+	{
+		
+		if((havePrivilege)&&(!isRequesting)&&(RN.get(lastRequest)== LN.get(lastRequest) + 1))
+		{
+			havePrivilege = false;
 
+			String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
+			sendPrivelege(encodedPrivilegeMsg, lastRequest);
+			SocketAddress mSocketAddress = new InetSocketAddress(mConfigReader.getNodeConfig(lastRequest)[1],Integer.parseInt(mConfigReader.getNodeConfig(lastRequest)[2]));
+			MessageInfo mMessageInfo = MessageInfo.createOutgoing(null,0);
+
+			try {
+
+				SctpChannel mSctpChannel = SctpChannel.open();
+				mSctpChannel.connect(mSocketAddress);
+				ByteBuffer mByteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
+				mByteBuffer.put(encodedPrivilegeMsg.getBytes());
+				mByteBuffer.flip();
+				mSctpChannel.send(mByteBuffer,mMessageInfo);
+				//System.out.println("SctpClient "+mServerNodeID+" : Send : "+mMessage.toString());
+				System.out.println("Privilege Message sending to "+ lastRequest);
+				//break;
+			} catch (Exception e) {
+				System.out.println("Exception: " +  e);
+
+			}
+		}
+
+	}
 	//Rahul
 	private void CriticalSection()
 	{
@@ -158,7 +183,19 @@ public class Application
 			e.printStackTrace();
 		}
 
-		finishedCS = true;
+		
+		try{
+				File file  = new File("cstest.txt");
+				FileWriter fw = new FileWriter(file,true);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write("\n"+mSelfNodeID + "x\n");
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				System.out.println(e);
+			}
+			System.out.println("Node "+mSelfNodeID+" exiting CS");
 	}
 
 	private boolean elementInQueue(Queue que , int element)
@@ -220,19 +257,8 @@ public class Application
 
 	private void ExitCS()
 	{
-		finishedCS = true;
-		try{
-		File file  = new File("cstest.txt");
-		FileWriter fw = new FileWriter(file,true);
-		BufferedWriter bw = new BufferedWriter(fw);
-		bw.write("\n"+mSelfNodeID + "x\n");
-		bw.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-		System.out.println("Node "+mSelfNodeID+" exiting CS");
+		
+		
 		LN.set(mSelfNodeID, RN.get(mSelfNodeID));
 		for(int i=0; i< mConfigReader.getNodeCount();i++)
 		{
@@ -249,7 +275,6 @@ public class Application
 		if(!requestQueue.isEmpty())
 		{
 			System.out.println("asd");
-			havePrivilege = false;
 			havePrivilege = false;
 			int headElement = (Integer)requestQueue.remove();
 
@@ -276,7 +301,7 @@ public class Application
 		}
 
 		isRequesting = false;
-
+		finishedCS = true;
 
 	}
 
@@ -472,7 +497,7 @@ public class Application
 			broadcastRequest(encodeRequest(mSelfNodeID,++seqNum));
 			while(!havePrivilege){System.out.print(".");};
 		}
-		CriticalSection();
+		//CriticalSection();
 	}
 
 

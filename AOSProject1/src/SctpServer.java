@@ -109,6 +109,12 @@ public class SctpServer implements Runnable {
 				{
 					System.out.println("Starts with r");
 					parentThread.processRequestMessage(mMessage);
+					
+					if(parentThread.finishedCS)
+					{
+						parentThread.lastRequest = parentThread.getRequestID(mMessage);
+						parentThread.requestReceived = true;
+					}
 				}
 				
 				mBuffer.flip();
