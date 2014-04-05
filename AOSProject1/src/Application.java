@@ -17,7 +17,7 @@ public class Application
 {
 	boolean havePrivilege;
 	boolean isRequesting;
-	boolean finishedCS;
+	boolean finishedCS; 
 	boolean timerExpired;
 	boolean requestReceived;
 	
@@ -25,7 +25,7 @@ public class Application
 
 	private static int mSelfNodeID = 0;
 	private static String mConfigFile = null;
-	private static ConfigReader mConfigReader = null;
+	private static ConfigReader mConfigReader = null; //Class used to read the config text file
 	private static SctpServer mServer = null;
 	private static Thread mServerThread = null;
 
@@ -56,6 +56,8 @@ public class Application
 			RN.add(new Integer(-1));
 			LN.add(new Integer(-1));
 		}
+		
+		//Node 0 starts with the token
 		if(mSelfNodeID == 0)
 		{
 			havePrivilege = true;
@@ -63,14 +65,16 @@ public class Application
 
 	}
 	
+	//Function to indicate that it is time to request entry into critical section
 	public void updateTimer()
 	{
 		timerExpired = true;
 	}
-
+	
+	//Application module where node enters and exits CS
 	public void applicationModule()
 	{
-		while(csCount<10)
+		while(csCount<10) //Loop until n requests are satisfied
 		{
 			int test = 0;
 			if(timerExpired)
@@ -78,9 +82,9 @@ public class Application
 				try 
 				{
 					timerExpired = false;
-					csEnter();
-					CriticalSection();
-					csLeave();
+					csEnter(); //Algorithm module to request entry into CS
+					CriticalSection(); //Enter CS
+					csLeave(); //Algorithm module to handle token upon exit
 				} 
 				catch (Exception e) 
 				{
@@ -88,6 +92,7 @@ public class Application
 				}
 			}
 			
+			//If request for token was received
 			else if(requestReceived)
 			{
 				respondRequest();
@@ -96,6 +101,8 @@ public class Application
 			
 			
 		}
+		
+		//After node is done, ensure token is passed on before terminating
 		while(havePrivilege)
 		{
 			int asd = 0;
@@ -109,7 +116,7 @@ public class Application
 		}
 	}
 	
-	//Request(j,n)
+	//Process received Request(j,n) message
 	//j - Node number
 	//n - Sequence number
 	public void processRequestMessage(String msg)
@@ -117,13 +124,14 @@ public class Application
 		int j,n;
 		j = getRequestID(msg);
 		n = getRequestSequence(msg);
-
+		
+		//Update RN array according to algorithm
 		RN.set(j,new Integer(Math.max(RN.get(j), n)));
 	}
 	
 	public void respondRequest()
 	{
-		
+		//Follow algorithm procedure to send token if necessary
 		if((havePrivilege)&&(!isRequesting)&&(RN.get(lastRequest)== LN.get(lastRequest) + 1))
 		{
 			havePrivilege = false;
@@ -152,8 +160,9 @@ public class Application
 
 	private void CriticalSection()
 	{
-		csCount++;
-		//do some activity in Cs. Write to Log file
+		csCount++; //Count number of satisfied CS entry requests
+		
+		//Do some activity in Cs. Write to Log file
 		Date d = new Date();
 		System.out.println("Node "+ mSelfNodeID + "entering Cs at "+d.getTime());
 		try {
@@ -182,7 +191,8 @@ public class Application
 			}
 			System.out.println("Node "+mSelfNodeID+" exiting CS");
 	}
-
+	
+	//Check if given node ID is in request queue
 	private boolean elementInQueue(Queue que , int element)
 	{
 		Iterator iterator = que.iterator();
@@ -202,7 +212,8 @@ public class Application
 	{
 		ExitCS();
 	}
-
+	
+	//Function to test log file for mutual exclusion errors
 	public int testCorrectness()
 	{
 		
@@ -216,14 +227,14 @@ public class Application
 	        	{
 	        		if(!((line1.charAt(0) == line2.charAt(0)) && (line1.charAt(1) != line2.charAt(1)) ))
 	        		{
-	        			System.out.println("Oops!!");
+	        			System.out.println("Mutual exclusion not satisfied");
 	        			return 0;
 	        		}
 	        	}
 	        	line1 = br.readLine();
 	        }
 	        
-	        System.out.println("Works!!");
+	        System.out.println("Algorithm works");
 	        
 	    }
 	    catch(Exception e)
@@ -237,7 +248,8 @@ public class Application
 	{
 		algorithmSendRequest();
 	}
-
+	
+	//Perform required algorithm procedures after exiting CS
 	private void ExitCS()
 	{
 		LN.set(mSelfNodeID, RN.get(mSelfNodeID));
@@ -275,14 +287,16 @@ public class Application
 		mConfigReader = new ConfigReader(mConfigFile);
 		app.initializeArrays();
 		
-		/* create server */
+		/* create server to receive messages*/
 		mServer = new SctpServer(app,mConfigReader.getNodeConfig(mSelfNodeID)[0], mConfigReader.getNodeConfig(mSelfNodeID)[1], mConfigReader.getNodeConfig(mSelfNodeID)[2],mConfigReader.getNodeCount() - 1);
 		mServerThread = new Thread(mServer);
 		mServerThread.start();
-
+		
+		//Timer to indicate when to request CS entry
 		TimerThread timer = new TimerThread(app);
 		new Thread(timer).start();
 		
+		//Create a communication channel to every other node
 		for(int i=0; i< mConfigReader.getNodeCount();i++)
 		{
 			if(i!= mSelfNodeID)
@@ -314,6 +328,8 @@ public class Application
 		System.exit(0);
 
 	}
+	
+	//Encode privilege message contents into String for transmission
 	public String encodePrivelege(Queue<Integer> q, ArrayList<Integer> arr)
 	{
 		String privelege = "p";
@@ -332,7 +348,8 @@ public class Application
 
 		return privelege;
 	}
-
+	
+	//Get queue from received privilege message string
 	public Queue<Integer> getPrivelegeQueue(String message)
 	{
 		Queue<Integer> q = new LinkedList<Integer>();
@@ -353,7 +370,8 @@ public class Application
 
 		return q;
 	}
-
+	
+	//Get array from received privilege message string
 	public ArrayList<Integer> getPrivelegeArray(String message)
 	{
 		message = message.substring(1); //Remove the first letter 'p'
@@ -371,7 +389,8 @@ public class Application
 
 		return arr;
 	}
-
+	
+	//Send token to designated node
 	public void sendPrivelege(String message, int destID)
 	{
 		isRequesting = false;
@@ -392,14 +411,16 @@ public class Application
 
 		}
 	}
-
+	
+	//Server thread calls this function when token is received
 	public void updateLocal(String prevMsg)
 	{
 		havePrivilege = true;
 		requestQueue = getPrivelegeQueue(prevMsg);
 		LN = getPrivelegeArray(prevMsg);
 	}
-
+	
+	//Send request message to all other nodes in system
 	public void broadcastRequest(String message)
 	{
 		for(int i=0; i< mConfigReader.getNodeCount();i++)
@@ -427,23 +448,23 @@ public class Application
 
 		}
 	}
-
+	
+	//Required algorithm procedure before generating CS request
 	public void algorithmSendRequest()
 	{
 		isRequesting = true;
 		finishedCS = false;
-		if(!havePrivilege)
+		if(!havePrivilege) //If this node does not have token
 		{
-			//System.out.println(RN.size()+ LN.size());
 			int temp = RN.get(mSelfNodeID);
 			temp+= 1;
 			RN.set(mSelfNodeID, temp);
 			broadcastRequest(encodeRequest(mSelfNodeID,++seqNum));
-			while(!havePrivilege){System.out.print(".");};
+			while(!havePrivilege){System.out.print(".");}; //Blocking call to wait until token is received
 		}
 	}
 
-
+	//Encode request message contents into a string
 	public String encodeRequest(int j, int n)
 	{
 		String request = "r";
@@ -456,7 +477,8 @@ public class Application
 
 		return request;
 	}
-
+	
+	//Get Node ID from received request message string
 	public int getRequestID(String message)
 	{
 		message = message.substring(1); //Remove the first letter 'r'
@@ -466,7 +488,8 @@ public class Application
 		int id = Integer.parseInt(temp1[0]);
 		return id;
 	}
-
+	
+	//Get sequence number from received request message string
 	public int getRequestSequence(String message)
 	{
 		message = message.substring(1); //Remove the first letter 'r'

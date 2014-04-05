@@ -33,6 +33,7 @@ public class SctpServer implements Runnable {
 
 			mServerChannel.bind(mServerAddress);
 			
+			//Loop infinitely listening for messages from other nodes
 			while(true){
 				ByteBuffer mBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
 				String mMessage;
@@ -44,11 +45,14 @@ public class SctpServer implements Runnable {
 
 				mMessage = bufferToString(mBuffer);
 				
+				//If privilege message is received
 				if(mMessage.startsWith("p"))
 				{
 					parentThread.updateLocal(mMessage);
 					
 				}
+				
+				//If request message is received
 				else if(mMessage.startsWith("r"))
 				{
 					parentThread.processRequestMessage(mMessage);

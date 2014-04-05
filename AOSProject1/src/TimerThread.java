@@ -9,6 +9,8 @@ public class TimerThread implements Runnable {
 	}
 	@Override
 	public void run() {
+	
+		//Continually initiate CS entry requests at certain time intervals
 		while(true)
 		{
 			try {
