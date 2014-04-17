@@ -94,7 +94,7 @@ public class Application
 	 */
 	public void applicationModule()
 	{
-		while(csCount<50) //Loop until n requests are satisfied
+		while(csCount<100) //Loop until n requests are satisfied
 		{
 			//if(mSelfNodeID == 1 && csCount == 20)
 				//break;
@@ -201,7 +201,7 @@ public class Application
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(mSelfNodeID + "e");
 			bw.close();
-			Thread.sleep(500);
+			Thread.sleep(10);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
