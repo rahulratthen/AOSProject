@@ -1,11 +1,6 @@
-10
+5
 0 net01.utdallas.edu 54490
 1 net02.utdallas.edu 54445
 2 net03.utdallas.edu 54445
-3 net04.utdallas.edu 54446
-4 net05.utdallas.edu 53456
-5 net06.utdallas.edu 54455
-6 net07.utdallas.edu 54343
-7 net08.utdallas.edu 55443
-8 net09.utdallas.edu 54434
-9 net10.utdallas.edu 53432
+3 net04.utdallas.edu 54445
+4 net05.utdallas.edu 54445

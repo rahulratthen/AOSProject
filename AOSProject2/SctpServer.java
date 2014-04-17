@@ -3,6 +3,7 @@ import java.nio.*;
 import com.sun.nio.sctp.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.sql.Date;
 
 public class SctpServer implements Runnable {
 	public static int MESSAGE_SIZE = 128;
@@ -63,12 +64,15 @@ public class SctpServer implements Runnable {
 				//If request message is received
 				else if(mMessage.startsWith("r"))
 				{
-					parentThread.processRequestMessage(mMessage);
 					
+					parentThread.processRequestMessage(mMessage);
+					parentThread.lastRequest = parentThread.getRequestID(mMessage);
+					parentThread.requestReceived = true;
 					if(parentThread.finishedCS)
 					{
-						parentThread.lastRequest = parentThread.getRequestID(mMessage);
-						parentThread.requestReceived = true;
+						
+						//parentThread.lastRequest = parentThread.getRequestID(mMessage);
+						//parentThread.requestReceived = true;
 					}
 				}
 				

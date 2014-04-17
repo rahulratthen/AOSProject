@@ -94,7 +94,7 @@ public class Application
 	 */
 	public void applicationModule()
 	{
-		while(csCount<100) //Loop until n requests are satisfied
+		while(csCount<50) //Loop until n requests are satisfied
 		{
 			//if(mSelfNodeID == 1 && csCount == 20)
 				//break;
@@ -114,6 +114,8 @@ public class Application
 				}
 			}
 			
+			
+			
 			//If request for token was received
 			else if(requestReceived)
 			{
@@ -128,8 +130,11 @@ public class Application
 		while(havePrivilege)
 		{
 			int asd = 0;
+			System.out.print("");
 			if(requestReceived)
 			{
+				//System.out.println(printTime());
+				
 				respondRequest();
 				requestReceived = false;
 				break;
@@ -151,6 +156,7 @@ public class Application
 		
 		//Update RN array according to algorithm
 		RN.set(j,new Integer(Math.max(RN.get(j), n)));
+		//System.out.println("Process Request Update RN : "+RN.get(j));
 	}
 	
 	/**
@@ -177,6 +183,8 @@ public class Application
 				mByteBuffer.flip();
 				mSctpChannel.send(mByteBuffer,mMessageInfo);
 				System.out.println("Privilege Message sending to "+ lastRequest);
+				LN.set(lastRequest, RN.get(lastRequest));
+				
 			} catch (Exception e) {
 				System.out.println("Exception: " +  e);
 
@@ -184,6 +192,8 @@ public class Application
 		}
 
 	}
+	
+
 
 	/**
 	 * Critical Section
@@ -323,7 +333,7 @@ public class Application
 		}
 
 		isRequesting = false;
-		finishedCS = true;
+		//finishedCS = true;
 	}
 
 	/**
@@ -530,14 +540,14 @@ public class Application
 	public void algorithmSendRequest()
 	{
 		isRequesting = true;
-		finishedCS = false;
+		//finishedCS = false;
 		if(!havePrivilege) //If this node does not have token
 		{
 			int temp = RN.get(mSelfNodeID);
 			temp+= 1;
 			RN.set(mSelfNodeID, temp);
 			broadcastRequest(encodeRequest(mSelfNodeID,++seqNum));
-			while(!havePrivilege){System.out.print(".");}; //Blocking call to wait until token is received
+			while(!havePrivilege){System.out.print("");}; //Blocking call to wait until token is received
 		}
 	}
 
