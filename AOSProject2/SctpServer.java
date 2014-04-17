@@ -66,13 +66,13 @@ public class SctpServer implements Runnable {
 				{
 					
 					parentThread.processRequestMessage(mMessage);
-					parentThread.lastRequest = parentThread.getRequestID(mMessage);
-					parentThread.requestReceived = true;
+					//parentThread.lastRequest = parentThread.getRequestID(mMessage);
+					//parentThread.requestReceived = true;
 					if(parentThread.finishedCS)
 					{
 						
-						//parentThread.lastRequest = parentThread.getRequestID(mMessage);
-						//parentThread.requestReceived = true;
+						parentThread.lastRequest = parentThread.getRequestID(mMessage);
+						parentThread.requestReceived = true;
 					}
 				}
 				

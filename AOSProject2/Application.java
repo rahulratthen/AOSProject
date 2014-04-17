@@ -127,6 +127,7 @@ public class Application
 		}
 		
 		//After node is done, ensure token is passed on before terminating
+		//Comment this out to crash the algorithm
 		while(havePrivilege)
 		{
 			int asd = 0;
@@ -168,6 +169,7 @@ public class Application
 		if((havePrivilege)&&(!isRequesting)&&(RN.get(lastRequest)== LN.get(lastRequest) + 1))
 		{
 			havePrivilege = false;
+			//havePrivilege = true;
 
 			String encodedPrivilegeMsg = encodePrivelege(requestQueue,LN);
 			sendPrivelege(encodedPrivilegeMsg, lastRequest);
@@ -211,7 +213,7 @@ public class Application
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(mSelfNodeID + "e");
 			bw.close();
-			Thread.sleep(10);
+			Thread.sleep(500);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -326,6 +328,7 @@ public class Application
 		if(!requestQueue.isEmpty())
 		{
 			havePrivilege = false;
+			//havePrivilege = true;
 			int headElement = (Integer)requestQueue.remove();
 
 			String msg = encodePrivelege(requestQueue,LN);
@@ -333,7 +336,7 @@ public class Application
 		}
 
 		isRequesting = false;
-		//finishedCS = true;
+		finishedCS = true;
 	}
 
 	/**
@@ -540,7 +543,7 @@ public class Application
 	public void algorithmSendRequest()
 	{
 		isRequesting = true;
-		//finishedCS = false;
+		finishedCS = false;
 		if(!havePrivilege) //If this node does not have token
 		{
 			int temp = RN.get(mSelfNodeID);
